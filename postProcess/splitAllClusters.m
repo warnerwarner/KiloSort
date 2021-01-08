@@ -101,10 +101,14 @@ while ik<Nfilt
             % we re-estimate w
             StS  = clp' * (clp .* (rs(:,1)/s1 + rs(:,2)/s2))/nSpikes; % these equations follow from the model
             StMu = clp' * (rs(:,1)*mu1/s1 + rs(:,2)*mu2/s2)/nSpikes;
-
-            w = StMu'/StS; % this is the new estimate of the best pursuit direection
-            w = normc(w'); % which we unit normalize
-            x = gather(clp * w);  % the new projections of the data onto this direction
+            if not (isnan(mean(diag(StS))))
+                w = StMu'/StS; % this is the new estimate of the best pursuit direection
+                w = normc(w'); % which we unit normalize
+                x = gather(clp * w);  % the new projections of the data onto this direction
+            else
+                disp(nSpikes);
+                disp(mean(diag(StS)));
+            end
         end
     end
 
