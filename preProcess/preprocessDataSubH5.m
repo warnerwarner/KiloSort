@@ -2,12 +2,12 @@ function rez = preprocessDataSubH5(ops)
 
 tic;
 ops.nt0 = getOr(ops, {'nt0'}, 61);
-ops.nt0min = getOr(ops, 'nt0min', ceil(20 * ops.nt0/61))
+ops.nt0min = getOr(ops, 'nt0min', ceil(20 * ops.nt0/61));
 
 NT = ops.NT;
 
 NchatTOT = ops.NchanTOT;
-finfo = h5info(ops.fbinary);
+finfo = h5info(ops.fbinary, '/sig');
 nTimepoints = finfo.Dataspace.Size(1);
 
 ops.tstart  = ceil(ops.trange(1) * ops.fs); % starting timepoint for processing data segment
@@ -77,7 +77,7 @@ for ibatch = 1:Nbatch
     end
 
     buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [NTbuff NchanTOT]);
-    buff = buff'
+    buff = buff';
     if isempty(buff)
         break; % this shouldn't really happen, unless we counted data batches wrong
     end
