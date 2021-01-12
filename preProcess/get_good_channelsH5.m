@@ -29,7 +29,8 @@ function igood = get_good_channels(ops, chanMap)
     % from a subset of batches, count threshold crossings
     while ibatch<=Nbatch
         offset = twind + NT*(ibatch-1) + 1;
-        buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [NT NchanTOT]);
+        buffEnd = min(NT, ops.timepoints);
+        buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [buffEnd NchanTOT]);
     
         buff = buff'; % Transpose it so that it is channels x time and works for the rest of the script
         if isempty(buff)
