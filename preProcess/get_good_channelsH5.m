@@ -30,6 +30,8 @@ function igood = get_good_channels(ops, chanMap)
     while ibatch<=Nbatch
         offset = twind + NT*(ibatch-1) + 1;
         buffEnd = min(NT, ops.sampsToRead);
+        disp(buffEnd)
+        disp(ops.sampsToRead)
         buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [buffEnd NchanTOT]);
     
         buff = buff'; % Transpose it so that it is channels x time and works for the rest of the script
