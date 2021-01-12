@@ -15,7 +15,7 @@ ops.tend    = min(nTimepoints, ceil(ops.trange(2) * ops.fs)); % ending timepoint
 ops.sampsToRead = ops.tend-ops.tstart; % total number of samples to read
 
 Nbatch = ceil(ops.sampsToRead/(NT-ops.ntbuff));
-ops.Nbatch = Nbath;
+ops.Nbatch = Nbatch;
 
 [chanMap, xc, yc, kcoords, NchanTOTdefault] = loadChanMap(ops.chanMap); % function to load channel map file
 ops.NchanTOT = getOr(ops, 'NchanTOT', NchanTOTdefault); % if NchanTOT was left empty, then overwrite with the default
