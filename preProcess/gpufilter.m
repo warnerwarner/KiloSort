@@ -12,18 +12,12 @@ if isfield(ops,'fslow')&&ops.fslow<ops.fs/2
 else
     [b1, a1] = butter(3, ops.fshigh/ops.fs*2, 'high'); % the default is to only do high-pass filtering at 150Hz
 end
-disp('1')
 dataRAW = gpuArray(buff); % move int16 data to GPU
-disp('2')
 dataRAW = dataRAW';
-disp('3')
 dataRAW = single(dataRAW); % convert to float32 so GPU operations are fast
-disp('4')
 dataRAW = dataRAW(:, chanMap); % subsample only good channels
-disp('5')
 % subtract the mean from each channel
 dataRAW = dataRAW - mean(dataRAW, 1); % subtract mean of each channel
-disp('6')
 % CAR, common average referencing by median
 if getOr(ops, 'CAR', 1)
     dataRAW = dataRAW - median(dataRAW, 2); % subtract median across channels
