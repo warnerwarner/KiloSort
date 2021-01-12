@@ -13,6 +13,7 @@ nTimepoints = finfo.Dataspace.Size(1);
 ops.tstart  = ceil(ops.trange(1) * ops.fs); % starting timepoint for processing data segment
 ops.tend    = min(nTimepoints, ceil(ops.trange(2) * ops.fs)); % ending timepoint
 ops.sampsToRead = ops.tend-ops.tstart; % total number of samples to read
+ops.twind = ops.tstart;
 
 Nbatch = ceil(ops.sampsToRead/(NT-ops.ntbuff));
 ops.Nbatch = Nbatch;
