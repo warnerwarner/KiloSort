@@ -31,7 +31,7 @@ function igood = get_good_channels(ops, chanMap)
         offset = twind + NT*(ibatch-1) + 1;
         buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [NT NchanTOT]);
     
-        buff = buff' % Transpose it so that it is channels x time and works for the rest of the script
+        buff = buff'; % Transpose it so that it is channels x time and works for the rest of the script
         if isempty(buff)
             break;
         end
