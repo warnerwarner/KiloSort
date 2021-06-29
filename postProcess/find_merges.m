@@ -2,18 +2,42 @@ function rez = find_merges(rez, flag)
 % this function merges clusters based on template correlation
 % however, a merge is veto-ed if refractory period violations are introduced
 
+wPCA  = rez.wPCA;
+wroll = [];
+tlag = [-2, -1, 1, 2];
+for j = 1:length(tlag)
+    wroll(:,:,j) = circshift(wPCA, tlag(j), 1)' * wPCA;
+end
+
+
 ops = rez.ops;
 dt = 1/1000;
 
-Xsim = rez.simScore; % this is the pairwise similarity score
+dmu = 2 * abs(rez.mu' - rez.mu ) ./ (rez.mu' + rez.mu);
+
+
+U = permute(rez.U, [2,1,3]);
+W = permute(rez.W, [2,1,3]);
+simScore = (U(:,:) * U(:,:)') .* (W(:,:) * W(:,:)')/6;
+
+for j = 1:size(wroll,3)
+    [Nfilt, nt0, ~] = size(W);
+    Wr = reshape(W, [Nfilt * nt0, 6]);
+    Wr = Wr * wroll(:,:,j)';
+    Wr = reshape(Wr, [Nfilt, nt0, 6]);
+    Xsim =  (U(:,:) * U(:,:)') .* (Wr(:,:) * W(:,:)')/6;
+    simScore = max(simScore, Xsim); 
+end
+rez.simScore = simScore;
+
+Xsim = simScore; % .* (dmu < .2);
+
 Nk = size(Xsim,1);
 Xsim = Xsim - diag(diag(Xsim)); % remove the diagonal of ones
 
+
 % sort by firing rate first
-nspk = zeros(Nk, 1);
-for j = 1:Nk
-    nspk(j) = sum(rez.st3(:,2)==j); % determine total number of spikes in each neuron
-end
+nspk = accumarray(rez.st3(:,2), 1, [Nk, 1], @sum);
 [~, isort] = sort(nspk); % we traverse the set of neurons in ascending order of firing rates
 
 fprintf('initialized spike counts\n')
@@ -33,8 +57,9 @@ for j = 1:Nk
     end
     % sort all the pairs of this neuron, discarding any that have fewer spikes
     [ccsort, ix] = sort(Xsim(isort(j),:) .* (nspk'>numel(s1)), 'descend');
-    ienu = find(ccsort<.5, 1) - 1; % find the first pair which has too low of a correlation
+    ienu = find(ccsort<.7, 1) - 1; % find the first pair which has too low of a correlation
 
+    
     % for all pairs above 0.5 correlation
     for k = 1:ienu
         s2 = rez.st3(rez.st3(:,2)==ix(k), 1)/ops.fs; % find the spikes of the pair
@@ -68,3 +93,12 @@ if ~flag
     rez.R_CCG  = min(rez.R_CCG , rez.R_CCG'); % symmetrize the scores
     rez.Q_CCG  = min(rez.Q_CCG , rez.Q_CCG');
 end
+
+hid = int32(rez.st3(:,2));
+ss = double(rez.st3(:,1)) / ops.fs;
+
+clust_good = check_clusters(hid, ss, 0.2);
+sum(clust_good)
+rez.good = clust_good;
+
+
