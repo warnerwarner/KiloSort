@@ -7,6 +7,7 @@ function [rez, X] = splitAllClusters(rez, flag)
 % it only uses the PC features for each spike, stored in rez.cProjPC
 
 ops = rez.ops;
+
 wPCA = gather(ops.wPCA); % use PCA projections to reconstruct templates when we do splits
 
 ccsplit = rez.ops.AUCsplit; % this is the threshold for splits, and is one of the main parameters users can change
@@ -49,8 +50,6 @@ while ik<Nfilt
     clp0 = rez.cProjPC(isp, :, :); % get the PC projections for these spikes
     clp0 = gpuArray(clp0(:,:));
     clp = clp0 - mean(clp0,1); % mean center them
-
-    clp = clp - my_conv2(clp, 250, 1); % subtract a running average, because the projections are NOT drift corrected
 
     % now use two different ways to initialize the bimodal direction
     % the main script calls this function twice, and does both initializations
@@ -113,7 +112,7 @@ while ik<Nfilt
     end
 
     ilow = rs(:,1)>rs(:,2); % these spikes are assigned to cluster 1
-%     ps = mean(rs(:,1));
+    %    ps = mean(rs(:,1));
     plow = mean(rs(ilow,1)); % the mean probability of spikes assigned to cluster 1
     phigh = mean(rs(~ilow,2)); % same for cluster 2
     nremove = min(mean(ilow), mean(~ilow)); % the smallest cluster has this proportion of all spikes
@@ -122,7 +121,7 @@ while ik<Nfilt
     % did this split fix the autocorrelograms?
     [K, Qi, Q00, Q01, rir] = ccg(ss(ilow), ss(~ilow), 500, dt); % compute the cross-correlogram between spikes in the putative new clusters
     Q12 = min(Qi/max(Q00, Q01)); % refractoriness metric 1
-    R = min(rir); % refractoriness metric 2
+    R = min(rir);                % refractoriness metric 2
 
     % if the CCG has a dip, don't do the split.
     % These thresholds are consistent with the ones from merges.
@@ -200,8 +199,6 @@ rez.simScore(isplit) = 1; % 1 means they come from the same parent
 
 rez.iNeigh   = gather(iList(:, 1:Nfilt)); % get the new neighbor templates
 rez.iNeighPC    = gather(iC(:, iW(1:Nfilt))); % get the new neighbor channels
-
-rez.Wphy = cat(1, zeros(1+ops.nt0min, Nfilt, Nrank), rez.W); % for Phy, we need to pad the spikes with zeros so the spikes are aligned to the center of the window
 
 rez.isplit = isplit; % keep track of origins for each cluster
 
