@@ -70,14 +70,15 @@ fidW        = fopen(ops.fproc,   'w'); % open for writing processed data
 for ibatch = 1:Nbatch
     % we'll create a binary file of batches of NT samples, which overlap consecutively on ops.ntbuff samples
     % in addition to that, we'll read another ops.ntbuff samples from before and after, to have as buffers for filtering
-    offset = max(0, ops.twind + ((NT - ops.ntbuff) * (ibatch-1) - 2*ops.ntbuff)); % number of samples to start reading at.
+    offset = max(1, ops.twind + ((NT - ops.ntbuff) * (ibatch-1) - 2*ops.ntbuff)); % number of samples to start reading at.
+    NTs = min(NTbuff, nTimepoints-offset);
     if offset==0
         ioffset = 0; % The very first batch has no pre-buffer, and has to be treated separately
     else
         ioffset = ops.ntbuff;
     end
 
-    buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [NTbuff NchanTOT]);
+    buff = h5read(ops.fbinary, '/sig', [offset 1], [NTs NchanTOT]);
     buff = buff';
     if isempty(buff)
         break; % this shouldn't really happen, unless we counted data batches wrong

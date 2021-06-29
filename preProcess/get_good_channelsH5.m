@@ -28,17 +28,19 @@ function igood = get_good_channels(ops, chanMap)
     
     % from a subset of batches, count threshold crossings
     while ibatch<=Nbatch
-        offset = twind + NT*(ibatch-1) + 1;
-        buffEnd = min(NT, ops.sampsToRead);
+        offset = max(1, twind + NT*(ibatch-1));
+        buffEnd = min(NT + offset, ops.sampsToRead);
+        % disp(ibatch)
+        % disp(buffEnd)
+        disp(offset)
         disp(buffEnd)
-        disp(ops.sampsToRead)
-        buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [buffEnd NchanTOT]);
-    
+        % disp(ops.sampsToRead)
+        buff = h5read(ops.fbinary, '/sig', [offset 1], [NT NchanTOT]);
         buff = buff'; % Transpose it so that it is channels x time and works for the rest of the script
         if isempty(buff)
             break;
         end
-    
+        disp(size(buff))
         datr    = gpufilter(buff, ops, chanMap); % apply filters and median subtraction
     
         % very basic threshold crossings calculation
@@ -57,6 +59,7 @@ function igood = get_good_channels(ops, chanMap)
     
         ibatch = ibatch + ceil(Nbatch/100); % skip every 100 batches
         ttime = ttime + size(datr,1)/ops.fs; % keep track of total time where we took spikes from
+        disp(ibatch/Nbatch)
     end
     
     ich = ich(1:k);

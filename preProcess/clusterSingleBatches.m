@@ -25,13 +25,13 @@ niter = 10; % iterations for k-means. we won't run it to convergence to save tim
 
 nBatches      = rez.temp.Nbatch;
 NchanNear = min(Nchan, 2*8+1);
-disp(nPCs, NchanNear, nBatches, Nfilt)
+
 % initialize big arrays on the GPU to hold the results from each batch
 Ws = gpuArray.zeros(nPCs , NchanNear, Nfilt, nBatches, 'single'); % this holds the unit norm templates
 mus = gpuArray.zeros(Nfilt, nBatches, 'single'); % this holds the scalings
 ns = gpuArray.zeros(Nfilt, nBatches, 'single'); % this holds the number of spikes for that cluster
 Whs = gpuArray.ones(Nfilt, nBatches, 'int32'); % this holds the center channel for each template
-disp('egg')
+
 i0 = 0;
 
 NrankPC = 3; % I am not sure if this gets used, but it goes into the function

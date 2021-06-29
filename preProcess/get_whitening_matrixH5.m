@@ -21,16 +21,15 @@ function Wrot = get_whitening_matrix(rez)
     end
     
     fprintf('Getting channel whitening matrix... \n');
-    fid = fopen(ops.fbinary, 'r');
     CC = gpuArray.zeros( Nchan,  Nchan, 'single'); % we'll estimate the covariance from data batches, then add to this variable
     
     
     ibatch = 1;
     while ibatch<=Nbatch
-        offset = max(0, twind + ((NT - ops.ntbuff) * (ibatch-1) - 2*ops.ntbuff));
-        buff = h5read(ops.fbinary, '/sig', [offset NchanTOT], [NTbuff NchanTOT]);
+        offset = max(1, twind + ((NT - ops.ntbuff) * (ibatch-1) - 2*ops.ntbuff));
+        buff = h5read(ops.fbinary, '/sig', [offset 1], [NTbuff NchanTOT]);
     
-        buff = buff' % Transpose it so that it is channels x time and works for the rest of the script
+        buff = buff'; % Transpose it so that it is channels x time and works for the rest of the script
         if isempty(buff)
             break;
         end
